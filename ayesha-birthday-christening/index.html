@@ -46,25 +46,37 @@
 }
 
 *{box-sizing:border-box;}
-html{scroll-behavior:smooth;scroll-snap-type:y mandatory;}
-/* One gesture moves exactly one section, up or down. */
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+
+/* iOS Safari only collapses its toolbars when the ROOT page scrolls. Scrolling
+   an inner container instead keeps the visible height constant, so a section
+   always matches the screen exactly and snap points stay where the eye is. */
+html,body{height:100%;overflow:hidden;}
 body{
   margin:0;
   background:var(--cream);
   color:var(--ink);
   font-family:'Quicksand',system-ui,sans-serif;
   font-weight:500;
-  overflow-x:hidden;
 }
+.deck{
+  height:100vh;          /* fallback for browsers without svh */
+  height:100svh;         /* the height with toolbars shown: our constant state */
+  overflow-y:auto;
+  overflow-x:hidden;
+  scroll-snap-type:y mandatory;
+  scroll-behavior:smooth;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.deck.snap-soft{scroll-snap-type:y proximity;}
+/* One gesture moves exactly one section, up or down. */
+@media (prefers-reduced-motion:reduce){.deck{scroll-behavior:auto;}}
 img{max-width:100%;display:block;}
 
 .page{
-  /* Fallback first, modern unit last so it wins. svh is the height with the
-     browser toolbar expanded, so a section never exceeds what is on screen —
-     which is what keeps snapping symmetric scrolling up as well as down. */
-  min-height:100vh;
-  min-height:100svh;
+  /* One deck-height per section. min-height (not height) so a section that
+     outgrows the screen still shows all its content instead of clipping. */
+  min-height:100%;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -408,7 +420,6 @@ img{max-width:100%;display:block;}
 
 /* Every section always keeps a snap point, so every section stays reachable.
    Firmness is chosen on the container instead: see the fit() guard in script. */
-html.snap-soft{scroll-snap-type:y proximity;}
 
 /* Short screens: tighten so each section still fits one viewport and can snap. */
 @media (max-height:760px){
@@ -449,6 +460,8 @@ html.snap-soft{scroll-snap-type:y proximity;}
   .btn{font-size:.8rem;padding:.62rem 1.05rem;}
 }
 </style>
+
+<div class="deck" id="deck">
 
 <div class="page hero" id="hero">
   <div class="hero-bg" aria-hidden="true"></div>
@@ -555,6 +568,8 @@ html.snap-soft{scroll-snap-type:y proximity;}
   <h2 class="script see-you" data-reveal>SEE YOU!</h2>
 </div>
 
+</div><!-- /.deck -->
+
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
   <div class="lightbox-veil" aria-hidden="true"></div>
   <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close photo">&#10005;</button>
@@ -609,13 +624,15 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
    dead zone the browser refuses to rest in, stranding the reader. Instead
    soften the whole container when any section is taller than the screen. */
 (function(){
+  var deck = document.getElementById('deck');
   var pages = document.querySelectorAll('.page');
   function fit(){
-    var vh = window.innerHeight, overflows = false;
+    if(!deck) return;
+    var vh = deck.clientHeight, overflows = false;
     /* box height, not scrollHeight: the question is whether the section
        itself is taller than the screen. */
     pages.forEach(function(s){ if(s.offsetHeight > vh + 4) overflows = true; });
-    document.documentElement.classList.toggle('snap-soft', overflows);
+    deck.classList.toggle('snap-soft', overflows);
   }
   fit();
   /* re-measure once type and images have settled, or the first read is stale */
@@ -675,7 +692,7 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var box  = document.getElementById('lightbox'),
       full = document.getElementById('lightbox-img'),
       shut = document.getElementById('lightbox-close'),
-      opener = null, flight = null;
+      opener = null, flight = null, deckTop = 0;
   if(!box) return;
 
   /* read the frame's settled tilt so the print straightens as it lifts */
@@ -709,8 +726,9 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     full.src = thumb.src;
     full.alt = thumb.alt;
     box.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    shut.focus();
+    var dk = document.getElementById('deck');
+    if(dk){ deckTop = dk.scrollTop; dk.style.overflowY = 'hidden'; }
+    shut.focus({preventScroll:true});
 
     if(REDUCED || !full.animate) return;
     requestAnimationFrame(function(){
@@ -729,8 +747,13 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var btn = opener, thumb = btn && btn.querySelector('img');
     function done(){
       box.classList.remove('open');
-      document.body.style.overflow = '';
-      if(btn) btn.focus();
+      var dk = document.getElementById('deck');
+      if(dk){
+        dk.style.overflowY = '';
+        /* restore exactly: unlocking overflow and refocusing both move it */
+        dk.scrollTop = deckTop;
+      }
+      if(btn) btn.focus({preventScroll:true});
       opener = null;
     }
     if(REDUCED || !full.animate || !thumb){ done(); return; }
