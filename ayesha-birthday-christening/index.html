@@ -59,34 +59,41 @@ body{
   font-weight:500;
 }
 .deck{
-  height:100vh;          /* fallback for browsers without svh */
-  height:100svh;         /* the height with toolbars shown: our constant state */
+  /* A plain block filling the locked root, NOT position:fixed — WebKit has
+     long-standing scroll-snap bugs inside fixed containers. */
+  height:100%;
   overflow-y:auto;
   overflow-x:hidden;
   scroll-snap-type:y mandatory;
-  scroll-behavior:smooth;
   overscroll-behavior-y:contain;
-  -webkit-overflow-scrolling:touch;
+  /* Deliberately NOT set here:
+     -webkit-overflow-scrolling:touch -> legacy iOS scroller, disables snap points
+     scroll-behavior:smooth           -> fights WebKit's own snap animation */
 }
-.deck.snap-soft{scroll-snap-type:y proximity;}
-/* One gesture moves exactly one section, up or down. */
-@media (prefers-reduced-motion:reduce){.deck{scroll-behavior:auto;}}
 img{max-width:100%;display:block;}
 
 .page{
-  /* One deck-height per section. min-height (not height) so a section that
-     outgrows the screen still shows all its content instead of clipping. */
-  min-height:100%;
+  /* Exactly one deck-height, always. Fixed height keeps every snap point on a
+     clean multiple instead of drifting with fractional content heights, which
+     is what lets mandatory snapping stay on permanently. A section whose
+     content does not fit scrolls inside itself rather than growing. */
+  height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
+  /* "safe" so overflowing content is never centred out of reach at the top;
+     declared second so browsers without it keep plain centring */
+  justify-content:safe center;
   text-align:center;
   padding:6rem 1.5rem;
   position:relative;
   scroll-snap-align:start;
-  scroll-snap-stop:always;
-  overflow:hidden;
+  /* scroll-snap-stop:always is deliberately omitted: Blink honours it cleanly
+     but WebKit's implementation makes iOS snapping erratic. A fast flick may
+     now cross more than one section, which is the normal, working behaviour. */
 }
 
 .script{
@@ -617,31 +624,6 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   },{threshold:.15,rootMargin:'0px 0px -8% 0px'});
   solo.forEach(function(e){io.observe(e);});
   lists.forEach(function(e){io.observe(e);});
-})();
-
-/* ---- firm per-section snap, but only while every section fits ----
-   Never strip a section's snap point: under mandatory that would make it a
-   dead zone the browser refuses to rest in, stranding the reader. Instead
-   soften the whole container when any section is taller than the screen. */
-(function(){
-  var deck = document.getElementById('deck');
-  var pages = document.querySelectorAll('.page');
-  function fit(){
-    if(!deck) return;
-    var vh = deck.clientHeight, overflows = false;
-    /* box height, not scrollHeight: the question is whether the section
-       itself is taller than the screen. */
-    pages.forEach(function(s){ if(s.offsetHeight > vh + 4) overflows = true; });
-    deck.classList.toggle('snap-soft', overflows);
-  }
-  fit();
-  /* re-measure once type and images have settled, or the first read is stale */
-  window.addEventListener('load', fit);
-  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-  var t;
-  function later(){ clearTimeout(t); t = setTimeout(fit, 150); }
-  window.addEventListener('resize', later);
-  window.addEventListener('orientationchange', later);
 })();
 
 /* ---- nonessential loops stop when their section is offscreen ---- */
