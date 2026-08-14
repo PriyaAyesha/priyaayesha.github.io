@@ -60,8 +60,11 @@ body{
 img{max-width:100%;display:block;}
 
 .page{
-  min-height:100svh;
+  /* Fallback first, modern unit last so it wins. svh is the height with the
+     browser toolbar expanded, so a section never exceeds what is on screen —
+     which is what keeps snapping symmetric scrolling up as well as down. */
   min-height:100vh;
+  min-height:100svh;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -145,8 +148,8 @@ img{max-width:100%;display:block;}
 .scroll-cue .chevs{display:flex;flex-direction:column;align-items:center;}
 .scroll-cue .chev{width:18px;height:9px;display:block;}
 .scroll-cue .chev polyline{fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.scroll-cue .chev.c1{animation:cue-drift 1.7s ease-in-out infinite;opacity:.9;}
-.scroll-cue .chev.c2{animation:cue-drift 1.7s ease-in-out infinite .18s;opacity:.4;margin-top:-4px;}
+.scroll-cue .chev.c1{animation:cue-drift 2.4s ease-in-out infinite;opacity:.9;}
+.scroll-cue .chev.c2{animation:cue-drift 2.4s ease-in-out infinite .26s;opacity:.4;margin-top:-4px;}
 /* a settling drift downward: no overshoot, no elastic return */
 @keyframes cue-drift{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
 @media (prefers-reduced-motion:reduce){.scroll-cue .chev{animation:none;}}
@@ -156,7 +159,7 @@ img{max-width:100%;display:block;}
    Hidden state is gated on .js so a failed script never blanks the page. */
 .js [data-reveal]{
   opacity:0;
-  transition:opacity .55s cubic-bezier(.16,1,.3,1);
+  transition:opacity .78s cubic-bezier(.16,1,.3,1);
   transition-delay:var(--d,0ms);
 }
 .js [data-reveal].in-view{opacity:1;}
@@ -165,7 +168,7 @@ img{max-width:100%;display:block;}
 .js .polaroid{
   opacity:0;
   transform:rotate(0deg) translateY(-10px) scale(.97);
-  transition:opacity .5s ease-out,transform .72s cubic-bezier(.16,1,.3,1);
+  transition:opacity .7s ease-out,transform 1.01s cubic-bezier(.16,1,.3,1);
   transition-delay:var(--d,0ms);
 }
 .js .polaroids.in-view .polaroid{opacity:1;}
@@ -176,7 +179,7 @@ img{max-width:100%;display:block;}
 /* Swatches are a real list too: a short, capped stagger. */
 .js .swatches li{
   opacity:0;transform:scale(.82);
-  transition:opacity .34s ease-out,transform .44s cubic-bezier(.16,1,.3,1);
+  transition:opacity .48s ease-out,transform .62s cubic-bezier(.16,1,.3,1);
   transition-delay:var(--d,0ms);
 }
 .js .swatches.in-view li{opacity:1;transform:scale(1);}
@@ -190,7 +193,7 @@ img{max-width:100%;display:block;}
 .js .hero.lit .hero-bg{
   transform:scale(1);
   filter:saturate(1);
-  transition:transform 2.1s cubic-bezier(.16,1,.3,1),filter 2.1s ease-out;
+  transition:transform 2.95s cubic-bezier(.16,1,.3,1),filter 2.95s ease-out;
 }
 /* 2. the script is swept on and settles from wet to dry */
 .js .hero .script{
@@ -202,19 +205,19 @@ img{max-width:100%;display:block;}
   clip-path:inset(0 -6% -18% 0);
   filter:blur(0);
   opacity:1;
-  transition:clip-path 1.15s cubic-bezier(.22,.61,.36,1) .18s,
-             filter .82s ease-out .42s,
-             opacity .5s ease-out .18s;
+  transition:clip-path 1.6s cubic-bezier(.22,.61,.36,1) .25s,
+             filter 1.15s ease-out .58s,
+             opacity .7s ease-out .25s;
 }
 /* 3. the rule draws outward from the centre, then details settle */
 .js .hero .divider{transform:scaleX(0);}
-.js .hero.lit .divider{transform:scaleX(1);transition:transform .8s cubic-bezier(.16,1,.3,1) 1.05s;}
+.js .hero.lit .divider{transform:scaleX(1);transition:transform 1.12s cubic-bezier(.16,1,.3,1) 1.47s;}
 .js .hero .detail-card,
 .js .hero .countdown,
 .js .hero .rsvp-block{opacity:0;}
-.js .hero.lit .detail-card{opacity:1;transition:opacity .7s ease-out 1.2s;}
-.js .hero.lit .countdown{opacity:1;transition:opacity .7s ease-out 1.36s;}
-.js .hero.lit .rsvp-block{opacity:1;transition:opacity .7s ease-out 1.52s;}
+.js .hero.lit .detail-card{opacity:1;transition:opacity .98s ease-out 1.68s;}
+.js .hero.lit .countdown{opacity:1;transition:opacity .98s ease-out 1.9s;}
+.js .hero.lit .rsvp-block{opacity:1;transition:opacity .98s ease-out 2.13s;}
 
 /* Reduced motion: keep the arrival legible, drop the travel. */
 @media (prefers-reduced-motion:reduce){
@@ -380,14 +383,14 @@ img{max-width:100%;display:block;}
 .lightbox-veil{
   position:absolute;inset:0;
   background:rgba(52,42,64,.92);
-  opacity:0;transition:opacity .34s ease;
+  opacity:0;transition:opacity .48s ease;
 }
 .lightbox.open .lightbox-veil{opacity:1;}
 .lightbox img{
   position:relative;
   max-width:100%;max-height:82vh;border-radius:12px;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.7);
-  opacity:0;transition:opacity .18s ease;
+  opacity:0;transition:opacity .25s ease;
 }
 .lightbox.open img{opacity:1;}
 .lightbox-close{
@@ -395,7 +398,7 @@ img{max-width:100%;display:block;}
   width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
   background:rgba(255,250,243,.9);color:var(--ink);
   font-size:1.3rem;line-height:1;display:grid;place-items:center;
-  opacity:0;transition:opacity .2s ease .22s;
+  opacity:0;transition:opacity .28s ease .3s;
 }
 .lightbox.open .lightbox-close{opacity:1;}
 .lightbox-close:focus-visible{outline:2px solid var(--cream);outline-offset:3px;}
@@ -573,7 +576,7 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){ hero.classList.add('lit'); });
   });
-  setTimeout(function(){ if(bg) bg.style.willChange = 'auto'; }, 2600);
+  setTimeout(function(){ if(bg) bg.style.willChange = 'auto'; }, 3600);
 })();
 
 /* ---- supporting reveals: quiet, and only staggered where a list exists ---- */
@@ -583,7 +586,7 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* cap the stagger so a list never crawls */
   lists.forEach(function(list){
-    var kids = list.children, step = Math.min(110, 420/Math.max(kids.length,1));
+    var kids = list.children, step = Math.min(155, 590/Math.max(kids.length,1));
     for(var i=0;i<kids.length;i++) kids[i].style.setProperty('--d', Math.round(i*step)+'ms');
   });
 
@@ -717,7 +720,7 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       flight = full.animate(
         [{transform:frame(d), borderRadius:'4px'},
          {transform:'none',   borderRadius:'12px'}],
-        {duration:460, easing:'cubic-bezier(.16,1,.3,1)'}
+        {duration:640, easing:'cubic-bezier(.16,1,.3,1)'}
       );
     });
   }
@@ -739,7 +742,7 @@ var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     flight = full.animate(
       [{transform:'none', borderRadius:'12px'},
        {transform:frame(d), borderRadius:'4px', opacity:.35}],
-      {duration:300, easing:'cubic-bezier(.4,0,1,1)'}
+      {duration:420, easing:'cubic-bezier(.4,0,1,1)'}
     );
     box.querySelector('.lightbox-veil').style.opacity = '0';
     shut.style.opacity = '0';
