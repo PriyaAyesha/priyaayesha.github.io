@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Ayesha Invitation//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:ayesha-1st-birthday-christening@priyaayesha.github.io
+DTSTAMP:20260814T000000Z
+DTSTART:20260919T020000Z
+DTEND:20260919T040000Z
+SUMMARY:Ayesha's 1st Birthday & Christening
+LOCATION:Minor Basilica of the National Shrine of Our Lady of Mount Carmel (Fr. Mark Horan Hall)\, Broadway Ave. cor. 5th St.\, Brgy. Mariana\, New Manila\, Quezon City
+DESCRIPTION:Please RSVP via the parents' Facebook Messenger on or before August 31\, 2026.
+URL:https://priyaayesha.github.io/ayesha-birthday-christening/
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Ayesha's 1st Birthday & Christening is tomorrow
+END:VALARM
+END:VEVENT
+END:VCALENDAR
